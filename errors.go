@@ -6,4 +6,5 @@ import (
 
 var (
 	DupDefErr = errors.New("duplicate route define")
+	UnknownContentTypeErr = errors.New("unknown content type")
 )

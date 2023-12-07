@@ -7,25 +7,42 @@ import (
 var root = bond.Mux().
 Def(
 	"",
-	bond.ContextFunc(func(c *bond.Context){
+	bond.ApiFunc(func(c *bond.Context){
 		c.W.Write([]byte("This is the index page"))
 	}),
 ).Def(
 	"hello",
 	bond.Mux().Def(
 		"en",
-		bond.ContextFunc(func(c *bond.Context){
+		bond.ApiFunc(func(c *bond.Context){
 			c.W.Write([]byte("Hello, World!"))
 		}),
 	).Def(
 		"ru",
-		bond.ContextFunc(func(c *bond.Context){
+		bond.ApiFunc(func(c *bond.Context){
 			c.W.Write([]byte("Привет, Мир!"))
 		}),
 	),
 ).Def(
 	"web",
 	bond.Static("./static"),
+).Def(
+	"test",
+	bond.ApiFunc(func(c *bond.Context){
+		c.SetContentType(bond.PlainText)
+		c.Printf(
+			"Path: %q\n" +
+			"Content-Type: %q\n",
+			c.Path(), c.ContentType(),
+		)
+		c.Printf("Query:\n")
+		for k, vs := range c.Query() {
+			c.Printf("\t%q:\n", k)
+			for _, v := range vs {
+				c.Printf("\t\t%q\n", v)
+			}
+		}
+	}),
 )
 
 func main() {

@@ -10,19 +10,6 @@ type HandlerFunc = http.HandlerFunc
 type Handler = http.Handler
 type Server = http.Server
 
-type Context struct {
-	R *Request
-	W ResponseWriter
-}
-
-type ContextFunc func(*Context)
-func (fn ContextFunc) ServeHTTP(w ResponseWriter, r *Request) {
-	fn(&Context{
-		R: r,
-		W: w,
-	})
-}
-
 func Static(pth string) Handler {
 	return http.FileServer(http.Dir(pth))
 }
