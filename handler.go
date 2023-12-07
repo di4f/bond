@@ -23,3 +23,6 @@ func (fn ContextFunc) ServeHTTP(w ResponseWriter, r *Request) {
 	})
 }
 
+func Static(pth string) Handler {
+	return http.FileServer(http.Dir(pth))
+}

@@ -3,7 +3,7 @@ package bond
 import (
 	"net/http"
 	"strings"
-	"fmt"
+	//"fmt"
 	"path"
 )
 
@@ -42,8 +42,8 @@ func (router *Router) ServeHTTP(w ResponseWriter, r *Request) {
 		prefix = path.Clean("/" + name)
 	}
 
-	fmt.Printf("Path: %q\n", r.URL.Path)
-	fmt.Printf("%q %q %q %q\n", pth, prefix, pths, name)
+	//fmt.Printf("Path: %q\n", r.URL.Path)
+	//fmt.Printf("%q %q %q %q\n", pth, prefix, pths, name)
 	handler, ok := router.pathMap[name]
 	if !ok {
 		http.NotFound(w, r)

@@ -23,6 +23,9 @@ Def(
 			c.W.Write([]byte("Привет, Мир!"))
 		}),
 	),
+).Def(
+	"web",
+	bond.Static("./static"),
 )
 
 func main() {
