@@ -1,3 +1,3 @@
-module github.com/omnipunk/bond
+module github.com/di4f/bond
 
 go 1.21.3
