@@ -2,25 +2,32 @@ package main
 
 import (
 	"github.com/di4f/bond"
+	"github.com/di4f/bond/methods"
+	"github.com/di4f/bond/contents"
 )
+
+type GetNotesOptions struct {
+	Id int `json:"id"`
+	Name string `json:"name"`
+}
 
 var root = bond.Mux().
 	Def(
 		"",
-		bond.ApiFunc(func(c *bond.Context) {
+		bond.Func(func(c *bond.Context) {
 			c.W.Write([]byte("This is the index page"))
 		}),
 	).Def(
 	"hello",
 	bond.Mux().Def(
 		"en",
-		bond.ApiFunc(func(c *bond.Context) {
-			c.W.Write([]byte("Hello, World!"))
+		bond.Func(func(c *bond.Context) {
+			c.Printf("Hello, World!")
 		}),
 	).Def(
 		"ru",
-		bond.ApiFunc(func(c *bond.Context) {
-			c.W.Write([]byte("Привет, Мир!"))
+		bond.Func(func(c *bond.Context) {
+			c.Printf("Привет, Мир!")
 		}),
 	),
 ).Def(
@@ -28,8 +35,8 @@ var root = bond.Mux().
 	bond.Static("./static"),
 ).Def(
 	"test",
-	bond.ApiFunc(func(c *bond.Context) {
-		c.SetContentType(bond.PlainText)
+	bond.Func(func(c *bond.Context) {
+		c.SetContentType(contents.Plain)
 		c.Printf(
 			"Path: %q\n"+
 				"Content-Type: %q\n",
@@ -43,6 +50,16 @@ var root = bond.Mux().
 			}
 		}
 	}),
+).Def(
+	"get-notes",
+	bond.Method().Def(
+		methods.Get,
+		bond.Func(func(c *bond.Context){
+			opts := GetNotesOptions{}
+			c.Scan(&opts)
+			c.Printf("%v", opts)
+		}),
+	),
 )
 
 func main() {

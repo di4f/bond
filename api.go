@@ -1,25 +1,20 @@
 package bond
 
 import (
-	//"io"
+	"io"
 	"encoding/json"
 	"net/http"
 	"net/url"
 	"fmt"
-)
-
-type ContentType string
-
-const (
-	PlainText ContentType = "text/plain; charset=utf-8"
+	"github.com/di4f/bond/contents"
 )
 
 type Decoder interface {
 	Decode(any) error
 }
 
-type ApiFunc func(*Context)
-func (fn ApiFunc) ServeHTTP(w ResponseWriter, r *Request) {
+type Func func(*Context)
+func (fn Func) ServeHTTP(w ResponseWriter, r *Request) {
 	fn(&Context{
 		R: r,
 		W: w,
@@ -31,14 +26,16 @@ type Context struct {
 	W ResponseWriter
 	// Custom data to store stuff.
 	Data any
+
+	scanErr error
 	dec Decoder
 }
 
-func (c *Context) SetContentType(typ ContentType) {
+func (c *Context) SetContentType(typ contents.Type) {
 	c.SetHeader("Content-Type", string(typ))
 }
 
-func (c *Context) ContentType() string {
+func (c *Context) ContentType() contents.Type {
 	ret, ok := c.Header("Content-Type")
 	if !ok {
 		return ""
@@ -46,7 +43,7 @@ func (c *Context) ContentType() string {
 	if len(ret) < 1 {
 		return ""
 	}
-	return ret[0]
+	return contents.Type(ret[0])
 }
 
 func (c *Context) SetHeader(k, v string) {
@@ -65,21 +62,29 @@ func (c *Context) Close() {
 
 // Scan the incoming value from body depending
 // on the content type of the request.
-func (c *Context) Scan(v any) error {
+func (c *Context) Scan(v any) bool {
 	if c.dec == nil {
 		typ := c.ContentType()
 		switch typ {
-		case "application/json" :
+		case contents.Json :
 			c.dec = json.NewDecoder(c.R.Body)
 		default:
-			return UnknownContentTypeErr
+			c.scanErr = UnknownContentTypeErr
+			return false
 		}
 	}
 	err := c.dec.Decode(v)
 	if err != nil {
-		return err
+		if err != io.EOF {
+			c.scanErr = err
+		}
+		return false
 	}
-	return nil
+	return true
+}
+
+func (c *Context) ScanErr() error {
+	return c.scanErr
 }
 
 func (c *Context) Path() string {
